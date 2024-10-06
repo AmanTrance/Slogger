@@ -4,7 +4,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slogger/database"
 	"slogger/graph"
+	"slogger/schema"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -18,10 +20,16 @@ func main() {
 		port = defaultPort
 	}
 
+	dbConnection := database.DBContext{
+		DBState: database.DBConnect(),
+	}
+
+	schema.InitializeSchema(dbConnection.DBState)
+
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", database.CreateDBContext(&dbConnection, srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
