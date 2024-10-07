@@ -2,11 +2,26 @@
 
 package model
 
+type CreateUserResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+type GetTokenResponse struct {
+	Success bool    `json:"success"`
+	Token   *string `json:"token,omitempty"`
+}
+
+type Mutation struct {
+}
+
 type Query struct {
 }
 
 type User struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	ID       int     `json:"id"`
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Token    *string `json:"token,omitempty"`
 }

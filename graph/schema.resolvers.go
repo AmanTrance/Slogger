@@ -6,20 +6,41 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"slogger/database"
 	"slogger/graph/model"
 )
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var users []*model.User = []*model.User{&model.User{
-		ID:       "123131212312",
-		Username: "amanfreecs",
-		Email:    "aman@gmail.com",
-	}}
-	return users, nil
+// Createuser is the resolver for the createuser field.
+func (r *mutationResolver) Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error) {
+	panic(fmt.Errorf("not implemented: Createuser - createuser"))
 }
+
+// Getuser is the resolver for the getuser field.
+func (r *queryResolver) Getuser(ctx context.Context, token *string) (*model.User, error) {
+	connection := database.GetContext(ctx)
+	if token == nil {
+		return nil, errors.New("Token must not be null")
+	}
+	var user model.User
+	_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE "users"."token" = (?)`, *token)
+	if err != nil {
+		return nil, errors.New("Token must be valid")
+	}
+	return &user, nil
+}
+
+// Gettoken is the resolver for the gettoken field.
+func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *string, password string) (*model.GetTokenResponse, error) {
+	panic(fmt.Errorf("not implemented: Gettoken - gettoken"))
+}
+
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
