@@ -52,18 +52,29 @@ type ComplexityRoot struct {
 		Success func(childComplexity int) int
 	}
 
+	GetPublicKeyResponse struct {
+		Pubkeys func(childComplexity int) int
+	}
+
 	GetTokenResponse struct {
 		Success func(childComplexity int) int
 		Token   func(childComplexity int) int
 	}
 
 	Mutation struct {
-		Createuser func(childComplexity int, username string, email string, password string) int
+		Addpublickey func(childComplexity int, token *string, pubkey model.PublicKeyWithMetaData) int
+		Createuser   func(childComplexity int, username string, email string, password string) int
+	}
+
+	PublicKeyWithData struct {
+		Chain     func(childComplexity int) int
+		PublicKey func(childComplexity int) int
 	}
 
 	Query struct {
-		Gettoken func(childComplexity int, username *string, email *string, password string) int
-		Getuser  func(childComplexity int, token *string) int
+		Getpublickey func(childComplexity int, token *string) int
+		Gettoken     func(childComplexity int, username *string, email *string, password string) int
+		Getuser      func(childComplexity int, token *string) int
 	}
 
 	User struct {
@@ -77,10 +88,12 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error)
+	Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error)
 }
 type QueryResolver interface {
 	Getuser(ctx context.Context, token *string) (*model.User, error)
 	Gettoken(ctx context.Context, username *string, email *string, password string) (*model.GetTokenResponse, error)
+	Getpublickey(ctx context.Context, token *string) (*model.GetPublicKeyResponse, error)
 }
 
 type executableSchema struct {
@@ -116,6 +129,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateUserResponse.Success(childComplexity), true
 
+	case "GetPublicKeyResponse.pubkeys":
+		if e.complexity.GetPublicKeyResponse.Pubkeys == nil {
+			break
+		}
+
+		return e.complexity.GetPublicKeyResponse.Pubkeys(childComplexity), true
+
 	case "GetTokenResponse.success":
 		if e.complexity.GetTokenResponse.Success == nil {
 			break
@@ -130,6 +150,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetTokenResponse.Token(childComplexity), true
 
+	case "Mutation.addpublickey":
+		if e.complexity.Mutation.Addpublickey == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addpublickey_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Addpublickey(childComplexity, args["token"].(*string), args["pubkey"].(model.PublicKeyWithMetaData)), true
+
 	case "Mutation.createuser":
 		if e.complexity.Mutation.Createuser == nil {
 			break
@@ -141,6 +173,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Createuser(childComplexity, args["username"].(string), args["email"].(string), args["password"].(string)), true
+
+	case "PublicKeyWithData.chain":
+		if e.complexity.PublicKeyWithData.Chain == nil {
+			break
+		}
+
+		return e.complexity.PublicKeyWithData.Chain(childComplexity), true
+
+	case "PublicKeyWithData.publicKey":
+		if e.complexity.PublicKeyWithData.PublicKey == nil {
+			break
+		}
+
+		return e.complexity.PublicKeyWithData.PublicKey(childComplexity), true
+
+	case "Query.getpublickey":
+		if e.complexity.Query.Getpublickey == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getpublickey_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Getpublickey(childComplexity, args["token"].(*string)), true
 
 	case "Query.gettoken":
 		if e.complexity.Query.Gettoken == nil {
@@ -208,7 +266,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPublicKeyWithMetaData,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -324,6 +384,47 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addpublickey_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addpublickey_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	arg1, err := ec.field_Mutation_addpublickey_argsPubkey(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pubkey"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addpublickey_argsToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addpublickey_argsPubkey(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PublicKeyWithMetaData, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pubkey"))
+	if tmp, ok := rawArgs["pubkey"]; ok {
+		return ec.unmarshalNPublicKeyWithMetaData2sloggerᚋgraphᚋmodelᚐPublicKeyWithMetaData(ctx, tmp)
+	}
+
+	var zeroVal model.PublicKeyWithMetaData
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_createuser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -403,6 +504,29 @@ func (ec *executionContext) field_Query___type_argsName(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getpublickey_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getpublickey_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getpublickey_argsToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -630,6 +754,56 @@ func (ec *executionContext) fieldContext_CreateUserResponse_message(_ context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _GetPublicKeyResponse_pubkeys(ctx context.Context, field graphql.CollectedField, obj *model.GetPublicKeyResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetPublicKeyResponse_pubkeys(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pubkeys, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PublicKeyWithData)
+	fc.Result = res
+	return ec.marshalNPublicKeyWithData2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetPublicKeyResponse_pubkeys(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetPublicKeyResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "chain":
+				return ec.fieldContext_PublicKeyWithData_chain(ctx, field)
+			case "publicKey":
+				return ec.fieldContext_PublicKeyWithData_publicKey(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PublicKeyWithData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _GetTokenResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.GetTokenResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_GetTokenResponse_success(ctx, field)
 	if err != nil {
@@ -776,6 +950,149 @@ func (ec *executionContext) fieldContext_Mutation_createuser(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addpublickey(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addpublickey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Addpublickey(rctx, fc.Args["token"].(*string), fc.Args["pubkey"].(model.PublicKeyWithMetaData))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addpublickey(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addpublickey_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicKeyWithData_chain(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicKeyWithData_chain(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Chain, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicKeyWithData_chain(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicKeyWithData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PublicKeyWithData_publicKey(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicKeyWithData_publicKey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublicKey, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PublicKeyWithData_publicKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PublicKeyWithData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getuser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getuser(ctx, field)
 	if err != nil {
@@ -895,6 +1212,65 @@ func (ec *executionContext) fieldContext_Query_gettoken(ctx context.Context, fie
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_gettoken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getpublickey(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getpublickey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Getpublickey(rctx, fc.Args["token"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.GetPublicKeyResponse)
+	fc.Result = res
+	return ec.marshalNGetPublicKeyResponse2ᚖsloggerᚋgraphᚋmodelᚐGetPublicKeyResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getpublickey(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pubkeys":
+				return ec.fieldContext_GetPublicKeyResponse_pubkeys(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetPublicKeyResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getpublickey_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3020,6 +3396,40 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPublicKeyWithMetaData(ctx context.Context, obj interface{}) (model.PublicKeyWithMetaData, error) {
+	var it model.PublicKeyWithMetaData
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"chain", "publicKey"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "chain":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chain"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Chain = data
+		case "publicKey":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("publicKey"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PublicKey = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3046,6 +3456,45 @@ func (ec *executionContext) _CreateUserResponse(ctx context.Context, sel ast.Sel
 			}
 		case "message":
 			out.Values[i] = ec._CreateUserResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var getPublicKeyResponseImplementors = []string{"GetPublicKeyResponse"}
+
+func (ec *executionContext) _GetPublicKeyResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GetPublicKeyResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getPublicKeyResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetPublicKeyResponse")
+		case "pubkeys":
+			out.Values[i] = ec._GetPublicKeyResponse_pubkeys(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3139,6 +3588,57 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "addpublickey":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addpublickey(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var publicKeyWithDataImplementors = []string{"PublicKeyWithData"}
+
+func (ec *executionContext) _PublicKeyWithData(ctx context.Context, sel ast.SelectionSet, obj *model.PublicKeyWithData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, publicKeyWithDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PublicKeyWithData")
+		case "chain":
+			out.Values[i] = ec._PublicKeyWithData_chain(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "publicKey":
+			out.Values[i] = ec._PublicKeyWithData_publicKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3210,6 +3710,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_gettoken(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getpublickey":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getpublickey(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3664,6 +4186,20 @@ func (ec *executionContext) marshalNCreateUserResponse2ᚖsloggerᚋgraphᚋmode
 	return ec._CreateUserResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNGetPublicKeyResponse2sloggerᚋgraphᚋmodelᚐGetPublicKeyResponse(ctx context.Context, sel ast.SelectionSet, v model.GetPublicKeyResponse) graphql.Marshaler {
+	return ec._GetPublicKeyResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGetPublicKeyResponse2ᚖsloggerᚋgraphᚋmodelᚐGetPublicKeyResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetPublicKeyResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GetPublicKeyResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNGetTokenResponse2sloggerᚋgraphᚋmodelᚐGetTokenResponse(ctx context.Context, sel ast.SelectionSet, v model.GetTokenResponse) graphql.Marshaler {
 	return ec._GetTokenResponse(ctx, sel, &v)
 }
@@ -3691,6 +4227,49 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNPublicKeyWithData2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithData) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPublicKeyWithData2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNPublicKeyWithMetaData2sloggerᚋgraphᚋmodelᚐPublicKeyWithMetaData(ctx context.Context, v interface{}) (model.PublicKeyWithMetaData, error) {
+	res, err := ec.unmarshalInputPublicKeyWithMetaData(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3985,6 +4564,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOPublicKeyWithData2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx context.Context, sel ast.SelectionSet, v *model.PublicKeyWithData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PublicKeyWithData(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

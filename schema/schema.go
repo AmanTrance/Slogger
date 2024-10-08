@@ -12,23 +12,6 @@ const (
 	POLYGON  = 4
 )
 
-type Chain int
-
-type User struct {
-	id       uint64
-	username string
-	email    string
-	password string
-	token    string
-}
-
-type PublicKeyWithMetaData struct {
-	chain     Chain
-	publicKey string
-}
-
-type UserPublicKeys []PublicKeyWithMetaData
-
 func createUserTable(connection *pg.DB) error {
 	_, err := connection.Exec(`
 		CREATE TABLE IF NOT EXISTS users (

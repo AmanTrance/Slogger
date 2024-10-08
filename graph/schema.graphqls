@@ -16,11 +16,27 @@ type GetTokenResponse {
     token: String
 }
 
+type PublicKeyWithData {
+    chain: Int!
+    publicKey: String!
+}
+
+input PublicKeyWithMetaData {
+    chain: Int!
+    publicKey: String!
+}
+
+type GetPublicKeyResponse {
+    pubkeys: [PublicKeyWithData]!
+}
+
 type Query {
     getuser(token: String): User
-    gettoken(username: String, email: String, password: String!): GetTokenResponse! 
+    gettoken(username: String, email: String, password: String!): GetTokenResponse!
+    getpublickey(token: String): GetPublicKeyResponse! 
 }
 
 type Mutation {
-    createuser(username: String!, email: String!, password: String!): CreateUserResponse!  
+    createuser(username: String!, email: String!, password: String!): CreateUserResponse! 
+    addpublickey(token: String, pubkey: PublicKeyWithMetaData!): Boolean! 
 }

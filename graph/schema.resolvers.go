@@ -7,10 +7,11 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slogger/database"
 	"slogger/graph/model"
 
-	"github.com/go-pg/pg/v10"
+	pg "github.com/go-pg/pg/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -49,6 +50,11 @@ func (r *mutationResolver) Createuser(ctx context.Context, username string, emai
 		Message: "User already exists!",
 	}
 	return &response, nil
+}
+
+// Addpublickey is the resolver for the addpublickey field.
+func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error) {
+	panic(fmt.Errorf("not implemented: Addpublickey - addpublickey"))
 }
 
 // Getuser is the resolver for the getuser field.
@@ -93,6 +99,11 @@ func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *s
 		Token:   user.Token,
 	}
 	return &response, nil
+}
+
+// Getpublickey is the resolver for the getpublickey field.
+func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model.GetPublicKeyResponse, error) {
+	panic(fmt.Errorf("not implemented: Getpublickey - getpublickey"))
 }
 
 // Mutation returns MutationResolver implementation.

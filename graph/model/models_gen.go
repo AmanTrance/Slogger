@@ -7,12 +7,26 @@ type CreateUserResponse struct {
 	Message string `json:"message"`
 }
 
+type GetPublicKeyResponse struct {
+	Pubkeys []*PublicKeyWithData `json:"pubkeys"`
+}
+
 type GetTokenResponse struct {
 	Success bool    `json:"success"`
 	Token   *string `json:"token,omitempty"`
 }
 
 type Mutation struct {
+}
+
+type PublicKeyWithData struct {
+	Chain     int    `json:"chain"`
+	PublicKey string `json:"publicKey"`
+}
+
+type PublicKeyWithMetaData struct {
+	Chain     int    `json:"chain"`
+	PublicKey string `json:"publicKey"`
 }
 
 type Query struct {
