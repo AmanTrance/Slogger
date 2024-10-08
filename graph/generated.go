@@ -66,7 +66,7 @@ type ComplexityRoot struct {
 		Createuser   func(childComplexity int, username string, email string, password string) int
 	}
 
-	PublicKeyWithData struct {
+	PublicKeyWithChain struct {
 		Chain     func(childComplexity int) int
 		PublicKey func(childComplexity int) int
 	}
@@ -174,19 +174,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Createuser(childComplexity, args["username"].(string), args["email"].(string), args["password"].(string)), true
 
-	case "PublicKeyWithData.chain":
-		if e.complexity.PublicKeyWithData.Chain == nil {
+	case "PublicKeyWithChain.chain":
+		if e.complexity.PublicKeyWithChain.Chain == nil {
 			break
 		}
 
-		return e.complexity.PublicKeyWithData.Chain(childComplexity), true
+		return e.complexity.PublicKeyWithChain.Chain(childComplexity), true
 
-	case "PublicKeyWithData.publicKey":
-		if e.complexity.PublicKeyWithData.PublicKey == nil {
+	case "PublicKeyWithChain.publicKey":
+		if e.complexity.PublicKeyWithChain.PublicKey == nil {
 			break
 		}
 
-		return e.complexity.PublicKeyWithData.PublicKey(childComplexity), true
+		return e.complexity.PublicKeyWithChain.PublicKey(childComplexity), true
 
 	case "Query.getpublickey":
 		if e.complexity.Query.Getpublickey == nil {
@@ -780,9 +780,9 @@ func (ec *executionContext) _GetPublicKeyResponse_pubkeys(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.PublicKeyWithData)
+	res := resTmp.([]*model.PublicKeyWithChain)
 	fc.Result = res
-	return ec.marshalNPublicKeyWithData2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx, field.Selections, res)
+	return ec.marshalNPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GetPublicKeyResponse_pubkeys(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -794,11 +794,11 @@ func (ec *executionContext) fieldContext_GetPublicKeyResponse_pubkeys(_ context.
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "chain":
-				return ec.fieldContext_PublicKeyWithData_chain(ctx, field)
+				return ec.fieldContext_PublicKeyWithChain_chain(ctx, field)
 			case "publicKey":
-				return ec.fieldContext_PublicKeyWithData_publicKey(ctx, field)
+				return ec.fieldContext_PublicKeyWithChain_publicKey(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PublicKeyWithData", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type PublicKeyWithChain", field.Name)
 		},
 	}
 	return fc, nil
@@ -1005,8 +1005,8 @@ func (ec *executionContext) fieldContext_Mutation_addpublickey(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _PublicKeyWithData_chain(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PublicKeyWithData_chain(ctx, field)
+func (ec *executionContext) _PublicKeyWithChain_chain(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithChain) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicKeyWithChain_chain(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1036,9 +1036,9 @@ func (ec *executionContext) _PublicKeyWithData_chain(ctx context.Context, field 
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PublicKeyWithData_chain(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PublicKeyWithChain_chain(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "PublicKeyWithData",
+		Object:     "PublicKeyWithChain",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1049,8 +1049,8 @@ func (ec *executionContext) fieldContext_PublicKeyWithData_chain(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _PublicKeyWithData_publicKey(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PublicKeyWithData_publicKey(ctx, field)
+func (ec *executionContext) _PublicKeyWithChain_publicKey(ctx context.Context, field graphql.CollectedField, obj *model.PublicKeyWithChain) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PublicKeyWithChain_publicKey(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1080,9 +1080,9 @@ func (ec *executionContext) _PublicKeyWithData_publicKey(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PublicKeyWithData_publicKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PublicKeyWithChain_publicKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "PublicKeyWithData",
+		Object:     "PublicKeyWithChain",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3618,24 +3618,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var publicKeyWithDataImplementors = []string{"PublicKeyWithData"}
+var publicKeyWithChainImplementors = []string{"PublicKeyWithChain"}
 
-func (ec *executionContext) _PublicKeyWithData(ctx context.Context, sel ast.SelectionSet, obj *model.PublicKeyWithData) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, publicKeyWithDataImplementors)
+func (ec *executionContext) _PublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, obj *model.PublicKeyWithChain) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, publicKeyWithChainImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("PublicKeyWithData")
+			out.Values[i] = graphql.MarshalString("PublicKeyWithChain")
 		case "chain":
-			out.Values[i] = ec._PublicKeyWithData_chain(ctx, field, obj)
+			out.Values[i] = ec._PublicKeyWithChain_chain(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "publicKey":
-			out.Values[i] = ec._PublicKeyWithData_publicKey(ctx, field, obj)
+			out.Values[i] = ec._PublicKeyWithChain_publicKey(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4229,7 +4229,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPublicKeyWithData2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithData) graphql.Marshaler {
+func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithChain) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4253,7 +4253,7 @@ func (ec *executionContext) marshalNPublicKeyWithData2ᚕᚖsloggerᚋgraphᚋmo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPublicKeyWithData2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx, sel, v[i])
+			ret[i] = ec.marshalOPublicKeyWithChain2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4566,11 +4566,11 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOPublicKeyWithData2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithData(ctx context.Context, sel ast.SelectionSet, v *model.PublicKeyWithData) graphql.Marshaler {
+func (ec *executionContext) marshalOPublicKeyWithChain2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v *model.PublicKeyWithChain) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._PublicKeyWithData(ctx, sel, v)
+	return ec._PublicKeyWithChain(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

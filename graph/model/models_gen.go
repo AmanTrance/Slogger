@@ -8,7 +8,7 @@ type CreateUserResponse struct {
 }
 
 type GetPublicKeyResponse struct {
-	Pubkeys []*PublicKeyWithData `json:"pubkeys"`
+	Pubkeys []*PublicKeyWithChain `json:"pubkeys"`
 }
 
 type GetTokenResponse struct {
@@ -19,7 +19,7 @@ type GetTokenResponse struct {
 type Mutation struct {
 }
 
-type PublicKeyWithData struct {
+type PublicKeyWithChain struct {
 	Chain     int    `json:"chain"`
 	PublicKey string `json:"publicKey"`
 }

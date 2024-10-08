@@ -16,7 +16,7 @@ type GetTokenResponse {
     token: String
 }
 
-type PublicKeyWithData {
+type PublicKeyWithChain {
     chain: Int!
     publicKey: String!
 }
@@ -27,7 +27,7 @@ input PublicKeyWithMetaData {
 }
 
 type GetPublicKeyResponse {
-    pubkeys: [PublicKeyWithData]!
+    pubkeys: [PublicKeyWithChain]!
 }
 
 type Query {
