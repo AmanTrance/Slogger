@@ -19,7 +19,7 @@ import (
 func (r *mutationResolver) Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error) {
 	connection := database.GetContext(ctx)
 	var user model.User
-	_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE username = (?) OR email = (?);`, &username, &email)
+	_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE username = (?) OR email = (?)`, &username, &email)
 	if err != nil {
 		if err == pg.ErrMultiRows {
 			response := model.CreateUserResponse{
@@ -29,7 +29,7 @@ func (r *mutationResolver) Createuser(ctx context.Context, username string, emai
 			return &response, err
 		} else if err == pg.ErrNoRows {
 			hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), 12)
-			_, err := connection.DBState.Exec(`INSERT INTO users (username, email, password, token) VALUES(?, ?, ?, ?);`, &username, &email, string(hashedPassword), nil)
+			_, err := connection.DBState.Exec(`INSERT INTO users (username, email, password, token) VALUES(?, ?, ?, ?)`, &username, &email, string(hashedPassword), nil)
 			if err != nil {
 				response := model.CreateUserResponse{
 					Success: false,
@@ -54,7 +54,25 @@ func (r *mutationResolver) Createuser(ctx context.Context, username string, emai
 
 // Addpublickey is the resolver for the addpublickey field.
 func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error) {
-	panic(fmt.Errorf("not implemented: Addpublickey - addpublickey"))
+	connection := database.GetContext(ctx)
+	if token == nil {
+		return false, nil
+	}
+	var user model.User
+	_, err := connection.DBState.QueryOne(&user, `SELECT id FROM users WHERE token = (?)`, *token)
+	if err != nil {
+		return false, err
+	} else {
+		_, execError := connection.DBState.Exec(`INSERT INTO public_keys (userid) VALUES (?) ON CONFLICT (userid) DO NOTHING`, &user.ID)
+		if execError != nil {
+			return false, execError
+		}
+	}
+	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || '[{ 'chain': '(?)', 'publicKey': '(?)' }]'::jsonb WHERE userid = (?)`, &pubkey.Chain, &pubkey.PublicKey, &user.ID)
+	if execError != nil {
+		return false, execError
+	}
+	return true, nil
 }
 
 // Getuser is the resolver for the getuser field.
