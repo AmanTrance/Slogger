@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slogger/database"
 	"slogger/graph/model"
 
@@ -68,7 +67,7 @@ func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubk
 			return false, execError
 		}
 	}
-	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || '[{ 'chain': '(?)', 'publicKey': '(?)' }]'::jsonb WHERE userid = (?)`, &pubkey.Chain, &pubkey.PublicKey, &user.ID)
+	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (array[(?)::jsonb]) WHERE userid = (?);`, &pubkey, &user.ID)
 	if execError != nil {
 		return false, execError
 	}
@@ -121,7 +120,21 @@ func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *s
 
 // Getpublickey is the resolver for the getpublickey field.
 func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model.GetPublicKeyResponse, error) {
-	panic(fmt.Errorf("not implemented: Getpublickey - getpublickey"))
+	connection := database.GetContext(ctx)
+	if token == nil {
+		return nil, errors.New("token should not be null!")
+	}
+	var user model.User
+	_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE token = (?)`, *token)
+	if err != nil {
+		return nil, err
+	}
+	var keys model.GetPublicKeyResponse
+	_, keyError := connection.DBState.QueryOne(&keys, `SELECT json_array(pubkey) as pubkeys from public_keys WHERE userid = (?)`, user.ID)
+	if keyError != nil {
+		return nil, keyError
+	}
+	return &keys, nil
 }
 
 // Mutation returns MutationResolver implementation.

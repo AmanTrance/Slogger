@@ -780,9 +780,9 @@ func (ec *executionContext) _GetPublicKeyResponse_pubkeys(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.PublicKeyWithChain)
+	res := resTmp.([][]*model.PublicKeyWithChain)
 	fc.Result = res
-	return ec.marshalNPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, field.Selections, res)
+	return ec.marshalNPublicKeyWithChain2ᚕᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GetPublicKeyResponse_pubkeys(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4229,7 +4229,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithChain) graphql.Marshaler {
+func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v [][]*model.PublicKeyWithChain) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4253,7 +4253,7 @@ func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋm
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPublicKeyWithChain2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, sel, v[i])
+			ret[i] = ec.marshalOPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4564,6 +4564,47 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithChain) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPublicKeyWithChain2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalOPublicKeyWithChain2ᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v *model.PublicKeyWithChain) graphql.Marshaler {

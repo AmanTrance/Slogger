@@ -27,7 +27,7 @@ input PublicKeyWithMetaData {
 }
 
 type GetPublicKeyResponse {
-    pubkeys: [PublicKeyWithChain]!
+    pubkeys: [[PublicKeyWithChain]]!
 }
 
 type Query {

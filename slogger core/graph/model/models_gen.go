@@ -8,7 +8,7 @@ type CreateUserResponse struct {
 }
 
 type GetPublicKeyResponse struct {
-	Pubkeys []*PublicKeyWithChain `json:"pubkeys"`
+	Pubkeys [][]*PublicKeyWithChain `json:"pubkeys"`
 }
 
 type GetTokenResponse struct {
