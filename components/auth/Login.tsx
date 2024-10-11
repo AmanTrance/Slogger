@@ -1,6 +1,4 @@
 'use client'
-
-
 import { useState } from 'react';
 
 export default function Login() {
@@ -25,7 +23,7 @@ export default function Login() {
 
   return (
     <section className="bg-gray-50 min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+      <div className="w-full md:w-3/4 flex flex-col items-center justify-center px-6 py-8">
         <a href="/" className="flex items-center mb-6 text-2xl font-semibold text-gray-900">
           Slogger
         </a>

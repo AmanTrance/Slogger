@@ -4,7 +4,7 @@ export function Header(){
             <header className="w-full bg-white shadow-md rounded-xl">
             <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-18">
-                <div className="text-black-900 text-4xl font-[1000] font-mono pt-4 p-2" >Slogger</div>
+                <div className="text-black-900 text-4xl font-[1000] font-mono pt-4 p-2">Slogger</div>
                 <div className="hidden md:flex space-x-2">
                     <button className="text-black font-bold rounded-full p-2  hover:bg-black hover:text-white">Dashboard</button>
                     <button className="text-black font-bold rounded-full p-2 hover:bg-black hover:text-white">Transaction</button>
