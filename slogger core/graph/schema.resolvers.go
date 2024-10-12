@@ -135,18 +135,38 @@ func (r *queryResolver) Getuser(ctx context.Context, token *string) (*model.User
 
 // Gettoken is the resolver for the gettoken field.
 func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *string, password string) (*model.GetTokenResponse, error) {
-	if username == nil || email == nil {
-		return nil, errors.New("Username and email should not be empty!")
+	if username == nil && email == nil {
+		return nil, errors.New("Both username and email should not be empty!")
 	}
 	connection := database.GetContext(ctx)
 	var user model.User
-	_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE username = (?) AND email = (?)`, *username, *email)
-	if err != nil {
-		response := model.GetTokenResponse{
-			Success: false,
-			Token:   nil,
+	if username != nil && email != nil {
+		_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE username = (?) AND email = (?)`, *username, *email)
+		if err != nil {
+			response := model.GetTokenResponse{
+				Success: false,
+				Token:   nil,
+			}
+			return &response, err
 		}
-		return &response, err
+	} else if username != nil && email == nil {
+		_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE username = (?)`, *username)
+		if err != nil {
+			response := model.GetTokenResponse{
+				Success: false,
+				Token:   nil,
+			}
+			return &response, err
+		}
+	} else {
+		_, err := connection.DBState.QueryOne(&user, `SELECT * from users WHERE email = (?)`, *email)
+		if err != nil {
+			response := model.GetTokenResponse{
+				Success: false,
+				Token:   nil,
+			}
+			return &response, err
+		}
 	}
 	passwordError := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if passwordError != nil {
