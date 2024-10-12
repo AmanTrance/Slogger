@@ -30,13 +30,44 @@ type GetPublicKeyResponse {
     pubkeys: [[PublicKeyWithChain]]!
 }
 
+input Logs {
+    userPublicKey: String!
+    receiverPublicKey: String!
+    sourceChain: Int!
+    destinationChain: Int!
+    typeOfTransfer: Int!
+    transferDetails: String
+    transactionSignature: String
+    gas: String
+    status: Int!
+}
+
+type GetTransactionLogs {
+    userPublicKey: String!
+    receiverPublicKey: String!
+    sourceChain: Int!
+    destinationChain: Int!
+    typeOfTransfer: Int!
+    transferDetails: String
+    transactionSignature: String
+    gas: String
+    status: Int!
+}
+
+type SaveLogsResponse {
+    success: Boolean!
+    message: String!
+}
+
 type Query {
     getuser(token: String): User
     gettoken(username: String, email: String, password: String!): GetTokenResponse!
-    getpublickey(token: String): GetPublicKeyResponse! 
+    getpublickey(token: String): GetPublicKeyResponse!
+    gettransactionlogs(token: String): [GetTransactionLogs]! 
 }
 
 type Mutation {
     createuser(username: String!, email: String!, password: String!): CreateUserResponse! 
     addpublickey(token: String, pubkey: PublicKeyWithMetaData!): Boolean! 
+    savelogs(token: String, logs: Logs!): SaveLogsResponse!
 }

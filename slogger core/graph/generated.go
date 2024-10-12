@@ -61,9 +61,22 @@ type ComplexityRoot struct {
 		Token   func(childComplexity int) int
 	}
 
+	GetTransactionLogs struct {
+		DestinationChain     func(childComplexity int) int
+		Gas                  func(childComplexity int) int
+		ReceiverPublicKey    func(childComplexity int) int
+		SourceChain          func(childComplexity int) int
+		Status               func(childComplexity int) int
+		TransactionSignature func(childComplexity int) int
+		TransferDetails      func(childComplexity int) int
+		TypeOfTransfer       func(childComplexity int) int
+		UserPublicKey        func(childComplexity int) int
+	}
+
 	Mutation struct {
 		Addpublickey func(childComplexity int, token *string, pubkey model.PublicKeyWithMetaData) int
 		Createuser   func(childComplexity int, username string, email string, password string) int
+		Savelogs     func(childComplexity int, token *string, logs model.Logs) int
 	}
 
 	PublicKeyWithChain struct {
@@ -72,9 +85,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Getpublickey func(childComplexity int, token *string) int
-		Gettoken     func(childComplexity int, username *string, email *string, password string) int
-		Getuser      func(childComplexity int, token *string) int
+		Getpublickey       func(childComplexity int, token *string) int
+		Gettoken           func(childComplexity int, username *string, email *string, password string) int
+		Gettransactionlogs func(childComplexity int, token *string) int
+		Getuser            func(childComplexity int, token *string) int
+	}
+
+	SaveLogsResponse struct {
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
 	}
 
 	User struct {
@@ -89,11 +108,13 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error)
 	Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error)
+	Savelogs(ctx context.Context, token *string, logs model.Logs) (*model.SaveLogsResponse, error)
 }
 type QueryResolver interface {
 	Getuser(ctx context.Context, token *string) (*model.User, error)
 	Gettoken(ctx context.Context, username *string, email *string, password string) (*model.GetTokenResponse, error)
 	Getpublickey(ctx context.Context, token *string) (*model.GetPublicKeyResponse, error)
+	Gettransactionlogs(ctx context.Context, token *string) ([]*model.GetTransactionLogs, error)
 }
 
 type executableSchema struct {
@@ -150,6 +171,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetTokenResponse.Token(childComplexity), true
 
+	case "GetTransactionLogs.destinationChain":
+		if e.complexity.GetTransactionLogs.DestinationChain == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.DestinationChain(childComplexity), true
+
+	case "GetTransactionLogs.gas":
+		if e.complexity.GetTransactionLogs.Gas == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.Gas(childComplexity), true
+
+	case "GetTransactionLogs.receiverPublicKey":
+		if e.complexity.GetTransactionLogs.ReceiverPublicKey == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.ReceiverPublicKey(childComplexity), true
+
+	case "GetTransactionLogs.sourceChain":
+		if e.complexity.GetTransactionLogs.SourceChain == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.SourceChain(childComplexity), true
+
+	case "GetTransactionLogs.status":
+		if e.complexity.GetTransactionLogs.Status == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.Status(childComplexity), true
+
+	case "GetTransactionLogs.transactionSignature":
+		if e.complexity.GetTransactionLogs.TransactionSignature == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.TransactionSignature(childComplexity), true
+
+	case "GetTransactionLogs.transferDetails":
+		if e.complexity.GetTransactionLogs.TransferDetails == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.TransferDetails(childComplexity), true
+
+	case "GetTransactionLogs.typeOfTransfer":
+		if e.complexity.GetTransactionLogs.TypeOfTransfer == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.TypeOfTransfer(childComplexity), true
+
+	case "GetTransactionLogs.userPublicKey":
+		if e.complexity.GetTransactionLogs.UserPublicKey == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionLogs.UserPublicKey(childComplexity), true
+
 	case "Mutation.addpublickey":
 		if e.complexity.Mutation.Addpublickey == nil {
 			break
@@ -173,6 +257,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Createuser(childComplexity, args["username"].(string), args["email"].(string), args["password"].(string)), true
+
+	case "Mutation.savelogs":
+		if e.complexity.Mutation.Savelogs == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_savelogs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Savelogs(childComplexity, args["token"].(*string), args["logs"].(model.Logs)), true
 
 	case "PublicKeyWithChain.chain":
 		if e.complexity.PublicKeyWithChain.Chain == nil {
@@ -212,6 +308,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Gettoken(childComplexity, args["username"].(*string), args["email"].(*string), args["password"].(string)), true
 
+	case "Query.gettransactionlogs":
+		if e.complexity.Query.Gettransactionlogs == nil {
+			break
+		}
+
+		args, err := ec.field_Query_gettransactionlogs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Gettransactionlogs(childComplexity, args["token"].(*string)), true
+
 	case "Query.getuser":
 		if e.complexity.Query.Getuser == nil {
 			break
@@ -223,6 +331,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Getuser(childComplexity, args["token"].(*string)), true
+
+	case "SaveLogsResponse.message":
+		if e.complexity.SaveLogsResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.SaveLogsResponse.Message(childComplexity), true
+
+	case "SaveLogsResponse.success":
+		if e.complexity.SaveLogsResponse.Success == nil {
+			break
+		}
+
+		return e.complexity.SaveLogsResponse.Success(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -267,6 +389,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputLogs,
 		ec.unmarshalInputPublicKeyWithMetaData,
 	)
 	first := true
@@ -484,6 +607,47 @@ func (ec *executionContext) field_Mutation_createuser_argsPassword(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_savelogs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_savelogs_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	arg1, err := ec.field_Mutation_savelogs_argsLogs(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["logs"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_savelogs_argsToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_savelogs_argsLogs(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.Logs, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("logs"))
+	if tmp, ok := rawArgs["logs"]; ok {
+		return ec.unmarshalNLogs2sloggerᚋgraphᚋmodelᚐLogs(ctx, tmp)
+	}
+
+	var zeroVal model.Logs
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -586,6 +750,29 @@ func (ec *executionContext) field_Query_gettoken_argsPassword(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_gettransactionlogs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_gettransactionlogs_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_gettransactionlogs_argsToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -889,6 +1076,393 @@ func (ec *executionContext) fieldContext_GetTokenResponse_token(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _GetTransactionLogs_userPublicKey(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_userPublicKey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserPublicKey, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_userPublicKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_receiverPublicKey(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_receiverPublicKey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReceiverPublicKey, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_receiverPublicKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_sourceChain(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_sourceChain(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourceChain, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_sourceChain(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_destinationChain(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_destinationChain(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DestinationChain, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_destinationChain(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_typeOfTransfer(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_typeOfTransfer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TypeOfTransfer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_typeOfTransfer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_transferDetails(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_transferDetails(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TransferDetails, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_transferDetails(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_transactionSignature(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_transactionSignature(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TransactionSignature, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_transactionSignature(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_gas(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_gas(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Gas, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_gas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetTransactionLogs_status(ctx context.Context, field graphql.CollectedField, obj *model.GetTransactionLogs) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GetTransactionLogs_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GetTransactionLogs_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetTransactionLogs",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createuser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createuser(ctx, field)
 	if err != nil {
@@ -999,6 +1573,67 @@ func (ec *executionContext) fieldContext_Mutation_addpublickey(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addpublickey_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_savelogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_savelogs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Savelogs(rctx, fc.Args["token"].(*string), fc.Args["logs"].(model.Logs))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SaveLogsResponse)
+	fc.Result = res
+	return ec.marshalNSaveLogsResponse2ᚖsloggerᚋgraphᚋmodelᚐSaveLogsResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_savelogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_SaveLogsResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_SaveLogsResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SaveLogsResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_savelogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1277,6 +1912,81 @@ func (ec *executionContext) fieldContext_Query_getpublickey(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_gettransactionlogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_gettransactionlogs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Gettransactionlogs(rctx, fc.Args["token"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.GetTransactionLogs)
+	fc.Result = res
+	return ec.marshalNGetTransactionLogs2ᚕᚖsloggerᚋgraphᚋmodelᚐGetTransactionLogs(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_gettransactionlogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userPublicKey":
+				return ec.fieldContext_GetTransactionLogs_userPublicKey(ctx, field)
+			case "receiverPublicKey":
+				return ec.fieldContext_GetTransactionLogs_receiverPublicKey(ctx, field)
+			case "sourceChain":
+				return ec.fieldContext_GetTransactionLogs_sourceChain(ctx, field)
+			case "destinationChain":
+				return ec.fieldContext_GetTransactionLogs_destinationChain(ctx, field)
+			case "typeOfTransfer":
+				return ec.fieldContext_GetTransactionLogs_typeOfTransfer(ctx, field)
+			case "transferDetails":
+				return ec.fieldContext_GetTransactionLogs_transferDetails(ctx, field)
+			case "transactionSignature":
+				return ec.fieldContext_GetTransactionLogs_transactionSignature(ctx, field)
+			case "gas":
+				return ec.fieldContext_GetTransactionLogs_gas(ctx, field)
+			case "status":
+				return ec.fieldContext_GetTransactionLogs_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetTransactionLogs", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_gettransactionlogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -1401,6 +2111,94 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SaveLogsResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.SaveLogsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SaveLogsResponse_success(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SaveLogsResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SaveLogsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SaveLogsResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.SaveLogsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SaveLogsResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SaveLogsResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SaveLogsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3396,6 +4194,89 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputLogs(ctx context.Context, obj interface{}) (model.Logs, error) {
+	var it model.Logs
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"userPublicKey", "receiverPublicKey", "sourceChain", "destinationChain", "typeOfTransfer", "transferDetails", "transactionSignature", "gas", "status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "userPublicKey":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userPublicKey"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserPublicKey = data
+		case "receiverPublicKey":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("receiverPublicKey"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReceiverPublicKey = data
+		case "sourceChain":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceChain"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceChain = data
+		case "destinationChain":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("destinationChain"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DestinationChain = data
+		case "typeOfTransfer":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeOfTransfer"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TypeOfTransfer = data
+		case "transferDetails":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transferDetails"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TransferDetails = data
+		case "transactionSignature":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transactionSignature"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TransactionSignature = data
+		case "gas":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gas"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Gas = data
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPublicKeyWithMetaData(ctx context.Context, obj interface{}) (model.PublicKeyWithMetaData, error) {
 	var it model.PublicKeyWithMetaData
 	asMap := map[string]interface{}{}
@@ -3562,6 +4443,76 @@ func (ec *executionContext) _GetTokenResponse(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var getTransactionLogsImplementors = []string{"GetTransactionLogs"}
+
+func (ec *executionContext) _GetTransactionLogs(ctx context.Context, sel ast.SelectionSet, obj *model.GetTransactionLogs) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getTransactionLogsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetTransactionLogs")
+		case "userPublicKey":
+			out.Values[i] = ec._GetTransactionLogs_userPublicKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "receiverPublicKey":
+			out.Values[i] = ec._GetTransactionLogs_receiverPublicKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sourceChain":
+			out.Values[i] = ec._GetTransactionLogs_sourceChain(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "destinationChain":
+			out.Values[i] = ec._GetTransactionLogs_destinationChain(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "typeOfTransfer":
+			out.Values[i] = ec._GetTransactionLogs_typeOfTransfer(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "transferDetails":
+			out.Values[i] = ec._GetTransactionLogs_transferDetails(ctx, field, obj)
+		case "transactionSignature":
+			out.Values[i] = ec._GetTransactionLogs_transactionSignature(ctx, field, obj)
+		case "gas":
+			out.Values[i] = ec._GetTransactionLogs_gas(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._GetTransactionLogs_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3591,6 +4542,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addpublickey":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addpublickey(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "savelogs":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_savelogs(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3744,6 +4702,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "gettransactionlogs":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_gettransactionlogs(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -3752,6 +4732,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var saveLogsResponseImplementors = []string{"SaveLogsResponse"}
+
+func (ec *executionContext) _SaveLogsResponse(ctx context.Context, sel ast.SelectionSet, obj *model.SaveLogsResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, saveLogsResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SaveLogsResponse")
+		case "success":
+			out.Values[i] = ec._SaveLogsResponse_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._SaveLogsResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4214,6 +5238,44 @@ func (ec *executionContext) marshalNGetTokenResponse2ᚖsloggerᚋgraphᚋmodel�
 	return ec._GetTokenResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNGetTransactionLogs2ᚕᚖsloggerᚋgraphᚋmodelᚐGetTransactionLogs(ctx context.Context, sel ast.SelectionSet, v []*model.GetTransactionLogs) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOGetTransactionLogs2ᚖsloggerᚋgraphᚋmodelᚐGetTransactionLogs(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4227,6 +5289,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNLogs2sloggerᚋgraphᚋmodelᚐLogs(ctx context.Context, v interface{}) (model.Logs, error) {
+	res, err := ec.unmarshalInputLogs(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v [][]*model.PublicKeyWithChain) graphql.Marshaler {
@@ -4270,6 +5337,20 @@ func (ec *executionContext) marshalNPublicKeyWithChain2ᚕᚕᚖsloggerᚋgraph�
 func (ec *executionContext) unmarshalNPublicKeyWithMetaData2sloggerᚋgraphᚋmodelᚐPublicKeyWithMetaData(ctx context.Context, v interface{}) (model.PublicKeyWithMetaData, error) {
 	res, err := ec.unmarshalInputPublicKeyWithMetaData(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSaveLogsResponse2sloggerᚋgraphᚋmodelᚐSaveLogsResponse(ctx context.Context, sel ast.SelectionSet, v model.SaveLogsResponse) graphql.Marshaler {
+	return ec._SaveLogsResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSaveLogsResponse2ᚖsloggerᚋgraphᚋmodelᚐSaveLogsResponse(ctx context.Context, sel ast.SelectionSet, v *model.SaveLogsResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SaveLogsResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4564,6 +5645,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOGetTransactionLogs2ᚖsloggerᚋgraphᚋmodelᚐGetTransactionLogs(ctx context.Context, sel ast.SelectionSet, v *model.GetTransactionLogs) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetTransactionLogs(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPublicKeyWithChain2ᚕᚖsloggerᚋgraphᚋmodelᚐPublicKeyWithChain(ctx context.Context, sel ast.SelectionSet, v []*model.PublicKeyWithChain) graphql.Marshaler {

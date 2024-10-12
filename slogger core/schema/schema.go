@@ -12,6 +12,18 @@ const (
 	POLYGON  = 4
 )
 
+const (
+	TOKEN   = 0
+	NFT     = 1
+	MESSAGE = 2
+)
+
+const (
+	PENDING = 0
+	FAILED  = 1
+	SUCCESS = 2
+)
+
 func createUserTable(connection *pg.DB) error {
 	_, err := connection.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
@@ -34,6 +46,26 @@ func createPublicKeysTable(connection *pg.DB) error {
 		pubkey jsonb[],
 		FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE
 	)`)
+	if err != nil {
+		panic(err.Error())
+	}
+	return nil
+}
+
+func createLogsSchema(connection *pg.DB) error {
+	_, err := connection.Exec(`
+		CREATE TABLE IF NOT EXISTS logs(
+		userid INT NOT NULL, 
+		userPublicKey TEXT NOT NULL,
+		receiverPublicKey TEXT NOT NULL,
+		sourceChain INT NOT NULL,
+		destinationChain INT NOT NULL,
+		typeOfTransfer INT NOT NULL,
+		transferDetails TEXT,
+		transactionSignature TEXT,
+		gas TEXT,
+		status INT NOT NULL 
+		)`)
 	if err != nil {
 		panic(err.Error())
 	}

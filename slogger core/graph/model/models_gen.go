@@ -16,6 +16,30 @@ type GetTokenResponse struct {
 	Token   *string `json:"token,omitempty"`
 }
 
+type GetTransactionLogs struct {
+	UserPublicKey        string  `json:"userPublicKey"`
+	ReceiverPublicKey    string  `json:"receiverPublicKey"`
+	SourceChain          int     `json:"sourceChain"`
+	DestinationChain     int     `json:"destinationChain"`
+	TypeOfTransfer       int     `json:"typeOfTransfer"`
+	TransferDetails      *string `json:"transferDetails,omitempty"`
+	TransactionSignature *string `json:"transactionSignature,omitempty"`
+	Gas                  *string `json:"gas,omitempty"`
+	Status               int     `json:"status"`
+}
+
+type Logs struct {
+	UserPublicKey        string  `json:"userPublicKey"`
+	ReceiverPublicKey    string  `json:"receiverPublicKey"`
+	SourceChain          int     `json:"sourceChain"`
+	DestinationChain     int     `json:"destinationChain"`
+	TypeOfTransfer       int     `json:"typeOfTransfer"`
+	TransferDetails      *string `json:"transferDetails,omitempty"`
+	TransactionSignature *string `json:"transactionSignature,omitempty"`
+	Gas                  *string `json:"gas,omitempty"`
+	Status               int     `json:"status"`
+}
+
 type Mutation struct {
 }
 
@@ -30,6 +54,11 @@ type PublicKeyWithMetaData struct {
 }
 
 type Query struct {
+}
+
+type SaveLogsResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 type User struct {
