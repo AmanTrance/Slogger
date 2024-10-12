@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slogger/database"
 	"slogger/graph/model"
 
@@ -184,7 +183,22 @@ func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model
 
 // Gettransactionlogs is the resolver for the gettransactionlogs field.
 func (r *queryResolver) Gettransactionlogs(ctx context.Context, token *string) ([]*model.GetTransactionLogs, error) {
-	panic(fmt.Errorf("not implemented: Gettransactionlogs - gettransactionlogs"))
+	if token == nil {
+		return nil, errors.New("Token must not be null!")
+	}
+	connection := database.GetContext(ctx)
+	var user model.User
+	_, err := connection.DBState.QueryOne(&user, `SELECT * FROM users WHERE token = (?)`, *token)
+	if err != nil {
+		return nil, err
+	}
+	var logs []*model.GetTransactionLogs
+	_, logsErr := connection.DBState.Query(&logs, `SELECT userPublicKey, receiverPublicKey, sourceChain, destinationChain, 
+											typeOfTransfer, transferDetails, transactionSignature, gas, status FROM logs WHERE userid = (?)`, &user.ID)
+	if logsErr != nil {
+		return nil, logsErr
+	}
+	return logs, nil
 }
 
 // Mutation returns MutationResolver implementation.

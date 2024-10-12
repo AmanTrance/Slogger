@@ -64,7 +64,8 @@ func createLogsSchema(connection *pg.DB) error {
 		transferDetails TEXT,
 		transactionSignature TEXT,
 		gas TEXT,
-		status INT NOT NULL 
+		status INT NOT NULL,
+		FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE 
 		)`)
 	if err != nil {
 		panic(err.Error())
