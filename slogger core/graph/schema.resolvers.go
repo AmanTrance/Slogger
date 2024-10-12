@@ -63,6 +63,20 @@ func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubk
 			return false, execError
 		}
 	}
+	var keys model.GetPublicKeyResponse
+	_, keyErr := connection.DBState.QueryOne(&keys, `SELECT json_array(pubkey) FROM public_keys WHERE userid = (?)`, &user.ID)
+	if keyErr != nil {
+		return false, keyErr
+	}
+	for _, i := range keys.Pubkeys {
+		for _, keys := range i {
+			if keys.Chain == pubkey.Chain && keys.PublicKey == pubkey.PublicKey {
+				return false, errors.New("Public Key already existed!")
+			} else {
+				continue
+			}
+		}
+	}
 	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (array[(?)::jsonb]) WHERE userid = (?);`, &pubkey, &user.ID)
 	if execError != nil {
 		return false, execError
@@ -126,7 +140,7 @@ func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model
 		return nil, err
 	}
 	var keys model.GetPublicKeyResponse
-	_, keyError := connection.DBState.QueryOne(&keys, `SELECT json_array(pubkey) as pubkeys from public_keys WHERE userid = (?)`, user.ID)
+	_, keyError := connection.DBState.QueryOne(&keys, `SELECT json_array(pubkey) as pubkeys from public_keys WHERE userid = (?)`, &user.ID)
 	if keyError != nil {
 		return nil, keyError
 	}

@@ -8,7 +8,7 @@ const (
 	SOLANA   = 0
 	POLKADOT = 1
 	BITCOIN  = 2
-	ETHERIUM = 3
+	ARBITRUM = 3
 	POLYGON  = 4
 )
 
