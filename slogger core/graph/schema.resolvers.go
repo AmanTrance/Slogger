@@ -11,6 +11,7 @@ import (
 	"slogger/graph/model"
 
 	pg "github.com/go-pg/pg/v10"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -155,9 +156,14 @@ func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *s
 		}
 		return &response, passwordError
 	}
+	token := uuid.New().String()
+	_, tokenErr := connection.DBState.Exec(`UPDATE users SET token = (?) WHERE id = (?)`, &token, &user.ID)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
 	response := model.GetTokenResponse{
 		Success: true,
-		Token:   user.Token,
+		Token:   &token,
 	}
 	return &response, nil
 }
