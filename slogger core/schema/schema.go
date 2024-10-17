@@ -7,15 +7,14 @@ import (
 const (
 	SOLANA   = 0
 	POLKADOT = 1
-	BITCOIN  = 2
+	ETHERIUM = 2
 	ARBITRUM = 3
 	POLYGON  = 4
 )
 
 const (
-	TOKEN   = 0
-	NFT     = 1
-	MESSAGE = 2
+	TOKEN = 0
+	NFT   = 1
 )
 
 const (

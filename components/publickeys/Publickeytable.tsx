@@ -9,8 +9,6 @@ export function Publickeytable() {
         { key: "Key3", status: "Waiting" },
     ]);
 
-    
-
     return (
         <div className="bg-white rounded-md shadow-md">
             <table className="min-w-full border border-gray-300 rounded-md overflow-hidden">

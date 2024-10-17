@@ -220,7 +220,8 @@ func (r *queryResolver) Gettransactionlogs(ctx context.Context, token *string) (
 	}
 	var logs []*model.GetTransactionLogs
 	_, logsErr := connection.DBState.Query(&logs, `SELECT userPublicKey, receiverPublicKey, sourceChain, destinationChain, 
-											typeOfTransfer, transferDetails, transactionSignature, gas, status FROM logs WHERE userid = (?)`, &user.ID)
+											typeOfTransfer, transferDetails, transactionSignature, gas, status FROM logs 
+											WHERE userid = (?)`, &user.ID)
 	if logsErr != nil {
 		return nil, logsErr
 	}
