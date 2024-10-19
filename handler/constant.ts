@@ -13,5 +13,5 @@ export enum TransferType {
 
 export enum Platform {
     MAINNET,
-    TESTNET
+    DEVNET
 }

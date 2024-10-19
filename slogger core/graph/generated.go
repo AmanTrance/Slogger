@@ -74,9 +74,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Addpublickey func(childComplexity int, token *string, pubkey model.PublicKeyWithMetaData) int
-		Createuser   func(childComplexity int, username string, email string, password string) int
-		Savelogs     func(childComplexity int, token *string, logs model.Logs) int
+		Addpublickey    func(childComplexity int, token *string, pubkey model.PublicKeyWithMetaData) int
+		Createuser      func(childComplexity int, username string, email string, password string) int
+		Deletepublickey func(childComplexity int, token *string, pubkey model.PublicKeyWithMetaData) int
+		Savelogs        func(childComplexity int, token *string, logs model.Logs) int
 	}
 
 	PublicKeyWithChain struct {
@@ -108,6 +109,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error)
 	Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error)
+	Deletepublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error)
 	Savelogs(ctx context.Context, token *string, logs model.Logs) (*model.SaveLogsResponse, error)
 }
 type QueryResolver interface {
@@ -257,6 +259,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Createuser(childComplexity, args["username"].(string), args["email"].(string), args["password"].(string)), true
+
+	case "Mutation.deletepublickey":
+		if e.complexity.Mutation.Deletepublickey == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletepublickey_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Deletepublickey(childComplexity, args["token"].(*string), args["pubkey"].(model.PublicKeyWithMetaData)), true
 
 	case "Mutation.savelogs":
 		if e.complexity.Mutation.Savelogs == nil {
@@ -604,6 +618,47 @@ func (ec *executionContext) field_Mutation_createuser_argsPassword(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deletepublickey_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deletepublickey_argsToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	arg1, err := ec.field_Mutation_deletepublickey_argsPubkey(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pubkey"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deletepublickey_argsToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+	if tmp, ok := rawArgs["token"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deletepublickey_argsPubkey(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.PublicKeyWithMetaData, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pubkey"))
+	if tmp, ok := rawArgs["pubkey"]; ok {
+		return ec.unmarshalNPublicKeyWithMetaData2sloggerᚋgraphᚋmodelᚐPublicKeyWithMetaData(ctx, tmp)
+	}
+
+	var zeroVal model.PublicKeyWithMetaData
 	return zeroVal, nil
 }
 
@@ -1573,6 +1628,61 @@ func (ec *executionContext) fieldContext_Mutation_addpublickey(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addpublickey_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deletepublickey(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deletepublickey(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Deletepublickey(rctx, fc.Args["token"].(*string), fc.Args["pubkey"].(model.PublicKeyWithMetaData))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deletepublickey(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deletepublickey_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4542,6 +4652,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addpublickey":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addpublickey(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletepublickey":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deletepublickey(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

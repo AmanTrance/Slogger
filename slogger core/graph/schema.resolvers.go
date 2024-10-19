@@ -82,9 +82,43 @@ func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubk
 			}
 		}
 	}
-	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (array[(?)::jsonb]) WHERE userid = (?);`, &pubkey, &user.ID)
+	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (array[(?)::jsonb]) WHERE userid = (?)`, &pubkey, &user.ID)
 	if execError != nil {
 		return false, execError
+	}
+	return true, nil
+}
+
+// Deletepublickey is the resolver for the deletepublickey field.
+func (r *mutationResolver) Deletepublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error) {
+	if token == nil {
+		return false, nil
+	}
+	connection := database.GetContext(ctx)
+	var user model.User
+	_, err := connection.DBState.QueryOne(&user, `SELECT * FROM users WHERE token = (?)`, *token)
+	if err != nil {
+		return false, err
+	}
+	var pubKeys model.GetPublicKeyResponse
+	_, keyQuerErr := connection.DBState.QueryOne(&pubKeys, `SELECT json_array(pubkey) as pubkeys from public_keys WHERE userid = (?)`, &user.ID)
+	if keyQuerErr != nil {
+		return false, keyQuerErr
+	}
+	var modifiedPubKeys []model.PublicKeyWithChain = []model.PublicKeyWithChain{}
+	for _, i := range pubKeys.Pubkeys {
+		for _, key := range i {
+			if key.PublicKey == pubkey.PublicKey {
+				continue
+			} else {
+				modifiedPubKeys = append(modifiedPubKeys, *key)
+			}
+		}
+	}
+	_, keyUpdateErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = (?) WHERE userid = (?)`, modifiedPubKeys, &user.ID)
+	if keyUpdateErr != nil {
+		println(keyUpdateErr.Error())
+		return false, keyUpdateErr
 	}
 	return true, nil
 }

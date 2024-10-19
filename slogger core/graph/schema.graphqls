@@ -68,6 +68,7 @@ type Query {
 
 type Mutation {
     createuser(username: String!, email: String!, password: String!): CreateUserResponse! 
-    addpublickey(token: String, pubkey: PublicKeyWithMetaData!): Boolean! 
+    addpublickey(token: String, pubkey: PublicKeyWithMetaData!): Boolean!
+    deletepublickey(token: String, pubkey: PublicKeyWithMetaData!): Boolean! 
     savelogs(token: String, logs: Logs!): SaveLogsResponse!
 }
