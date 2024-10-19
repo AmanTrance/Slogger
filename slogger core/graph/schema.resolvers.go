@@ -111,7 +111,11 @@ func (r *mutationResolver) Deletepublickey(ctx context.Context, token *string, p
 			}
 		}
 	}
-	_, keyUpdateErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = (?) WHERE userid = (?)`, modifiedPubKeys, &user.ID)
+	_, keyErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = NULL WHERE userid = (?)`, &user.ID)
+	if keyErr != nil {
+		return false, nil
+	}
+	_, keyUpdateErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (?)::jsonb WHERE userid = (?)`, modifiedPubKeys, &user.ID)
 	if keyUpdateErr != nil {
 		println(keyUpdateErr.Error())
 		return false, keyUpdateErr
