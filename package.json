@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@polkadot/api": "^14.0.1",
+    "@polkadot/keyring": "^13.1.1",
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.95.3",
     "@wormhole-foundation/sdk": "^0.12.0",

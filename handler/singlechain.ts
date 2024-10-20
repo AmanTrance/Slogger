@@ -3,7 +3,7 @@ import { Chains, Platform, TransferType } from "./constant";
 import bs58 from "bs58";
 import { createTransferCheckedInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
-export async function handleSingleChainTransaction(chain: Chains, senderPrivateSecretKey: string, senderPublicKey: string, receiverPublicKey: string, transferType: TransferType, platform: Platform, amount?: number, nftMintAddress?: string, nftTokenAccount?: string) {
+export async function handleSingleChainTransaction(chain: Chains, senderPrivateSecretKey: string, senderPublicKey: string, receiverPublicKey: string, transferType: TransferType, platform: Platform, amount?: number, nftMintAddress?: string, nftTokenAccount?: string): Promise<[string, number | null] | undefined> {
     switch (chain) {
         case Chains.SOLANA:
             if (transferType === TransferType.TOKEN) {
@@ -19,8 +19,9 @@ export async function handleSingleChainTransaction(chain: Chains, senderPrivateS
                         secretKey: bs58.decode(senderPrivateSecretKey)
                     };
                     const SolanaConnection: Connection = new Connection(clusterApiUrl("mainnet-beta"));
+                    const SolanaGasFee: number | null = await SolanaTransaction.getEstimatedFee(SolanaConnection);
                     const SolanaStatus: string = await sendAndConfirmTransaction(SolanaConnection, SolanaTransaction, [SolanaSigner]);
-                    return SolanaStatus;
+                    return [SolanaStatus, SolanaGasFee];
                 } else {
                     const SolanaTransaction: Transaction = new Transaction();
                     SolanaTransaction.add(SystemProgram.transfer({
@@ -33,15 +34,16 @@ export async function handleSingleChainTransaction(chain: Chains, senderPrivateS
                         secretKey: bs58.decode(senderPrivateSecretKey)
                     };
                     const SolanaConnection: Connection = new Connection(clusterApiUrl("devnet"));
+                    const SolanaGasFee: number | null = await SolanaTransaction.getEstimatedFee(SolanaConnection);
                     const SolanaStatus: string = await sendAndConfirmTransaction(SolanaConnection, SolanaTransaction, [SolanaSigner]);
-                    return SolanaStatus;      
+                    return [SolanaStatus, SolanaGasFee];      
                 }
             } else {
                 if (platform === Platform.MAINNET) {
                     let SolanaNftStatus: string | null = null;
                     if (nftMintAddress === null || nftTokenAccount === null) {
                         SolanaNftStatus = "failed";
-                        return SolanaNftStatus;
+                        return [SolanaNftStatus, null];
                     }
                     const SolanaNftTransaction: Transaction = new Transaction();
                     const receiverTokenAccount: PublicKey = await getAssociatedTokenAddress(new PublicKey(nftMintAddress!), new PublicKey(receiverPublicKey)); 
@@ -53,13 +55,14 @@ export async function handleSingleChainTransaction(chain: Chains, senderPrivateS
                         secretKey: bs58.decode(senderPrivateSecretKey)
                     }
                     const SolanaNftConnection: Connection = new Connection(clusterApiUrl("mainnet-beta"));
+                    const SolanaGasFee: number | null = await SolanaNftTransaction.getEstimatedFee(SolanaNftConnection);
                     SolanaNftStatus = await sendAndConfirmTransaction(SolanaNftConnection, SolanaNftTransaction, [SolanaNftSigner]);
-                    return SolanaNftStatus;
+                    return [SolanaNftStatus, SolanaGasFee];
                 } else {
                     let SolanaNftStatus: string | null = null;
                     if (nftMintAddress === null || nftTokenAccount === null) {
                         SolanaNftStatus = "failed";
-                        return SolanaNftStatus;
+                        return [SolanaNftStatus, null];
                     }
                     const SolanaNftTransaction: Transaction = new Transaction();
                     const receiverTokenAccount: PublicKey = await getAssociatedTokenAddress(new PublicKey(nftMintAddress!), new PublicKey(receiverPublicKey)); 
@@ -71,8 +74,9 @@ export async function handleSingleChainTransaction(chain: Chains, senderPrivateS
                         secretKey: bs58.decode(senderPrivateSecretKey)
                     }
                     const SolanaNftConnection: Connection = new Connection(clusterApiUrl("devnet"));
+                    const SolanaGasFee: number | null = await SolanaNftTransaction.getEstimatedFee(SolanaNftConnection);
                     SolanaNftStatus = await sendAndConfirmTransaction(SolanaNftConnection, SolanaNftTransaction, [SolanaNftSigner]);
-                    return SolanaNftStatus;
+                    return [SolanaNftStatus, SolanaGasFee];
                 }
             }
         case Chains.POLKADOT:
