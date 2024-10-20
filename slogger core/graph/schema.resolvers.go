@@ -11,7 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Createuser is the resolver for the createuser field.
 func (r *mutationResolver) Createuser(ctx context.Context, username string, email string, password string) (*model.CreateUserResponse, error) {
 	connection := database.GetContext(ctx)
 	var user model.User
@@ -48,7 +47,6 @@ func (r *mutationResolver) Createuser(ctx context.Context, username string, emai
 	return &response, nil
 }
 
-// Addpublickey is the resolver for the addpublickey field.
 func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error) {
 	connection := database.GetContext(ctx)
 	if token == nil {
@@ -78,14 +76,13 @@ func (r *mutationResolver) Addpublickey(ctx context.Context, token *string, pubk
 			}
 		}
 	}
-	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (array[(?)::jsonb]) WHERE userid = (?)`, &pubkey, &user.ID)
+	_, execError := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (?)::jsonb WHERE userid = (?)`, &pubkey, &user.ID)
 	if execError != nil {
 		return false, execError
 	}
 	return true, nil
 }
 
-// Deletepublickey is the resolver for the deletepublickey field.
 func (r *mutationResolver) Deletepublickey(ctx context.Context, token *string, pubkey model.PublicKeyWithMetaData) (bool, error) {
 	if token == nil {
 		return false, nil
@@ -115,15 +112,15 @@ func (r *mutationResolver) Deletepublickey(ctx context.Context, token *string, p
 	if keyErr != nil {
 		return false, nil
 	}
-	_, keyUpdateErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (?)::jsonb WHERE userid = (?)`, modifiedPubKeys, &user.ID)
-	if keyUpdateErr != nil {
-		println(keyUpdateErr.Error())
-		return false, keyUpdateErr
+	for _, i := range modifiedPubKeys {
+		_, keyUpdateErr := connection.DBState.Exec(`UPDATE public_keys SET pubkey = pubkey || (?)::jsonb WHERE userid = (?)`, &i, &user.ID)
+		if keyUpdateErr != nil {
+			continue
+		}
 	}
 	return true, nil
 }
 
-// Savelogs is the resolver for the savelogs field.
 func (r *mutationResolver) Savelogs(ctx context.Context, token *string, logs model.Logs) (*model.SaveLogsResponse, error) {
 	if token == nil {
 		response := model.SaveLogsResponse{
@@ -153,7 +150,6 @@ func (r *mutationResolver) Savelogs(ctx context.Context, token *string, logs mod
 	return &response, nil
 }
 
-// Getuser is the resolver for the getuser field.
 func (r *queryResolver) Getuser(ctx context.Context, token *string) (*model.User, error) {
 	connection := database.GetContext(ctx)
 	if token == nil {
@@ -167,7 +163,6 @@ func (r *queryResolver) Getuser(ctx context.Context, token *string) (*model.User
 	return &user, nil
 }
 
-// Gettoken is the resolver for the gettoken field.
 func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *string, password string) (*model.GetTokenResponse, error) {
 	if username == nil && email == nil {
 		return nil, errors.New("Both username and email should not be empty!")
@@ -222,7 +217,6 @@ func (r *queryResolver) Gettoken(ctx context.Context, username *string, email *s
 	return &response, nil
 }
 
-// Getpublickey is the resolver for the getpublickey field.
 func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model.GetPublicKeyResponse, error) {
 	connection := database.GetContext(ctx)
 	if token == nil {
@@ -241,7 +235,6 @@ func (r *queryResolver) Getpublickey(ctx context.Context, token *string) (*model
 	return &keys, nil
 }
 
-// Gettransactionlogs is the resolver for the gettransactionlogs field.
 func (r *queryResolver) Gettransactionlogs(ctx context.Context, token *string) ([]*model.GetTransactionLogs, error) {
 	if token == nil {
 		return nil, errors.New("Token must not be null!")
@@ -262,10 +255,8 @@ func (r *queryResolver) Gettransactionlogs(ctx context.Context, token *string) (
 	return logs, nil
 }
 
-// Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }

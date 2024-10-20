@@ -474,7 +474,7 @@ func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
 			Result: dg.FieldSet,
 			Errors: graphql.GetErrors(ctx),
 		}
-		// null fields should bubble up
+
 		if dg.FieldSet.Invalids > 0 {
 			ds.Result = graphql.Null
 		}
@@ -496,7 +496,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "schema.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -511,10 +510,6 @@ var sources = []*ast.Source{
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
-
-// endregion ************************** generated!.gotpl **************************
-
-// region    ***************************** args.gotpl *****************************
 
 func (ec *executionContext) field_Mutation_addpublickey_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -895,14 +890,6 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	return zeroVal, nil
 }
 
-// endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
-// region    **************************** field.gotpl *****************************
-
 func (ec *executionContext) _CreateUserResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CreateUserResponse_success(ctx, field)
 	if err != nil {
@@ -916,7 +903,7 @@ func (ec *executionContext) _CreateUserResponse_success(ctx context.Context, fie
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.Success, nil
 	})
 	if err != nil {
@@ -960,7 +947,7 @@ func (ec *executionContext) _CreateUserResponse_message(ctx context.Context, fie
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.Message, nil
 	})
 	if err != nil {
@@ -1004,7 +991,7 @@ func (ec *executionContext) _GetPublicKeyResponse_pubkeys(ctx context.Context, f
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.Pubkeys, nil
 	})
 	if err != nil {
@@ -1054,7 +1041,7 @@ func (ec *executionContext) _GetTokenResponse_success(ctx context.Context, field
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.Success, nil
 	})
 	if err != nil {
@@ -1098,7 +1085,7 @@ func (ec *executionContext) _GetTokenResponse_token(ctx context.Context, field g
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.Token, nil
 	})
 	if err != nil {
@@ -1139,7 +1126,7 @@ func (ec *executionContext) _GetTransactionLogs_userPublicKey(ctx context.Contex
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.UserPublicKey, nil
 	})
 	if err != nil {
@@ -1183,7 +1170,7 @@ func (ec *executionContext) _GetTransactionLogs_receiverPublicKey(ctx context.Co
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
+		ctx = rctx
 		return obj.ReceiverPublicKey, nil
 	})
 	if err != nil {
